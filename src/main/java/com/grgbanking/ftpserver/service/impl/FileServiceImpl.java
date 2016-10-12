@@ -1,26 +1,23 @@
 package com.grgbanking.ftpserver.service.impl;
 
+import javax.annotation.PostConstruct;
+
 import org.springframework.stereotype.Service;
 
+import com.grgbanking.ftpserver.enums.OptEnum;
 import com.grgbanking.ftpserver.service.FtpService;
 
 @Service
-public class FileServiceImpl implements FtpService {
+public class FileServiceImpl extends FtpService {
 
-	private String opt = "";
-	
-	public FileServiceImpl() {
-		System.out.println("================FileServiceImpl");
+	@PostConstruct
+	public void init() {
+		this.opt = OptEnum.FINGER.name();
 	}
 	
 	@Override
-	public String getOpt() {
-		return this.opt;
-	}
-
-	@Override
-	public String handler(String json) {
+	protected String process(String json) {
+		System.out.println("FileServiceImpl=" + json);
 		return null;
 	}
-
 }

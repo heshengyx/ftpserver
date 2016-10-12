@@ -1,7 +1,16 @@
 package com.grgbanking.ftpserver.service;
 
-public interface FtpService {
+public abstract class FtpService {
 
-	String getOpt();
-	String handler(String json);
+	protected String opt;
+
+	public final String getOpt() {
+		return this.opt;
+	}
+
+	public final String handler(String json) {
+		return process(json);
+	}
+
+	protected abstract String process(String json);
 }

@@ -10,14 +10,14 @@ import com.grgbanking.ftpserver.service.FtpService;
 @Component
 public class FtpHandler {
 
-	@Autowired
 	private List<FtpService> services;
-	
-	public FtpHandler() {
-		System.out.println("==================" + services);
-	}
 
 	public List<FtpService> getServices() {
 		return services;
+	}
+
+	@Autowired
+	public void setServices(List<FtpService> services) {
+		this.services = services;
 	}
 }
