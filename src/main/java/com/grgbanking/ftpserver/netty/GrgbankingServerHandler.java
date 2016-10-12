@@ -1,21 +1,20 @@
 package com.grgbanking.ftpserver.netty;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
-
 import java.net.InetSocketAddress;
 import java.util.List;
-
-import net.sf.json.JSONObject;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.grgbanking.ftpserver.FtpServer;
 import com.grgbanking.ftpserver.handler.FtpHandler;
-import com.grgbanking.ftpserver.service.FtpService;
+
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
+import net.sf.json.JSONObject;
 
 public class GrgbankingServerHandler extends ChannelInboundHandlerAdapter {
 
@@ -83,10 +82,10 @@ public class GrgbankingServerHandler extends ChannelInboundHandlerAdapter {
 			if (StringUtils.isBlank(opt)) {
 				message = "请求数据没有操作标示";
 			} else {
-				List<FtpService> services = ftpHandler.getServices();
-				for (FtpService service : services) {
-					if (opt.equals(service.getOpt())) {
-						message = service.handler(body);
+				List<FtpServer> servers = ftpHandler.getServers();
+				for (FtpServer server : servers) {
+					if (opt.equals(server.getOpt())) {
+						message = server.handler(body);
 						break;
 					}
 				}

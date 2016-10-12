@@ -8,11 +8,11 @@ import javax.servlet.ServletContextListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.grgbanking.ftpserver.FtpServer;
 import com.grgbanking.ftpserver.enums.OptEnum;
 import com.grgbanking.ftpserver.handler.ApplicationContextHandler;
 import com.grgbanking.ftpserver.handler.FtpHandler;
 import com.grgbanking.ftpserver.netty.GrgbankingServer;
-import com.grgbanking.ftpserver.service.FtpService;
 
 
 public class GrgbankingListener implements ServletContextListener {
@@ -32,10 +32,10 @@ public class GrgbankingListener implements ServletContextListener {
 		String opt = OptEnum.FINGER.name();
 		String json = "json";
 		FtpHandler ftpHandler = ApplicationContextHandler.getBean("ftpHandler");
-		List<FtpService> services = ftpHandler.getServices();
-		for (FtpService service : services) {
-			if (opt.equals(service.getOpt())) {
-				service.handler(json);
+		List<FtpServer> servers = ftpHandler.getServers();
+		for (FtpServer server : servers) {
+			if (opt.equals(server.getOpt())) {
+				server.handler(json);
 			}
 		}
 		//读取配置信息

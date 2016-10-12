@@ -5,19 +5,19 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.grgbanking.ftpserver.service.FtpService;
+import com.grgbanking.ftpserver.FtpServer;
 
 @Component
 public class FtpHandler {
 
-	private List<FtpService> services;
+	private List<FtpServer> servers;
 
-	public List<FtpService> getServices() {
-		return services;
+	public List<FtpServer> getServers() {
+		return servers;
 	}
 
 	@Autowired
-	public void setServices(List<FtpService> services) {
-		this.services = services;
+	public void setServers(List<FtpServer> servers) {
+		this.servers = servers;
 	}
 }

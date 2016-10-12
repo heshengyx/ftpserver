@@ -1,6 +1,6 @@
-package com.grgbanking.ftpserver.service;
+package com.grgbanking.ftpserver;
 
-public abstract class FtpService {
+public abstract class FtpServer {
 
 	protected String opt;
 

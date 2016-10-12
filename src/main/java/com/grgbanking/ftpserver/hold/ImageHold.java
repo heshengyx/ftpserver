@@ -1,14 +1,14 @@
-package com.grgbanking.ftpserver.service.impl;
+package com.grgbanking.ftpserver.hold;
 
 import javax.annotation.PostConstruct;
 
 import org.springframework.stereotype.Service;
 
+import com.grgbanking.ftpserver.FtpServer;
 import com.grgbanking.ftpserver.enums.OptEnum;
-import com.grgbanking.ftpserver.service.FtpService;
 
 @Service
-public class FileServiceImpl extends FtpService {
+public class ImageHold extends FtpServer {
 
 	@PostConstruct
 	public void init() {
@@ -17,7 +17,8 @@ public class FileServiceImpl extends FtpService {
 	
 	@Override
 	protected String process(String json) {
-		System.out.println("FileServiceImpl=" + json);
+		System.out.println(json);
 		return null;
 	}
+
 }
