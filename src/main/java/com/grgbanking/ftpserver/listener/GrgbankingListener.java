@@ -1,15 +1,11 @@
 package com.grgbanking.ftpserver.listener;
 
-import java.util.List;
-
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.grgbanking.ftpserver.FtpServer;
-import com.grgbanking.ftpserver.enums.OptEnum;
 import com.grgbanking.ftpserver.handler.ApplicationContextHandler;
 import com.grgbanking.ftpserver.handler.FtpHandler;
 import com.grgbanking.ftpserver.netty.GrgbankingServer;
@@ -29,18 +25,10 @@ public class GrgbankingListener implements ServletContextListener {
  
 	@Override
 	public void contextInitialized(ServletContextEvent sce) {
-		String opt = OptEnum.FINGER.name();
-		String json = "json";
 		FtpHandler ftpHandler = ApplicationContextHandler.getBean("ftpHandler");
-		List<FtpServer> servers = ftpHandler.getServers();
-		for (FtpServer server : servers) {
-			if (opt.equals(server.getOpt())) {
-				server.handler(json);
-			}
-		}
 		//读取配置信息
 		String serverPort = sce.getServletContext().getInitParameter("serverPort");
-		server = new GrgbankingServer(Integer.parseInt(serverPort));
+		server = new GrgbankingServer(Integer.parseInt(serverPort), ftpHandler);
 		try {
 			LOGGER.info("FTP服务正在启动中...");
 			//以下代码会阻塞

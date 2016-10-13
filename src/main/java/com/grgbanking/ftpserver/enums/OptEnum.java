@@ -2,6 +2,9 @@ package com.grgbanking.ftpserver.enums;
 
 public enum OptEnum {
 	
-	//指纹
-	FINGER;
+	//传送消息
+	Ftping,
+	
+	//确认消息
+	FtpEnd;
 }

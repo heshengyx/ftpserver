@@ -23,8 +23,8 @@ public class GrgbankingServerHandler extends ChannelInboundHandlerAdapter {
 	
 	private FtpHandler ftpHandler;
 
-	public GrgbankingServerHandler() {
-		ftpHandler = new FtpHandler();
+	public GrgbankingServerHandler(FtpHandler ftpHandler) {
+		this.ftpHandler = ftpHandler;
 	}
 
 	@Override
@@ -40,10 +40,11 @@ public class GrgbankingServerHandler extends ChannelInboundHandlerAdapter {
 		buf.readBytes(req);
 
 		String body = new String(req, "UTF-8");
-		LOGGER.info("终端[" + ip + "]，接收消息：" + body);
+		LOGGER.info("终端[{}]，接收消息：{}", new Object[]{ip, body});
 		if (StringUtils.isNotBlank(body)) {
-			message = praseJSON(body);
-			LOGGER.info("终端[" + ip + "]，响应消息：" + message);
+
+			message = praseJSON(body, ip);
+			LOGGER.info("终端[{}]，响应消息：", new Object[]{ip, message});
 		}
 		if (StringUtils.isNotBlank(message)) {
 			ByteBuf resp = Unpooled.copiedBuffer(message.getBytes("UTF-8"));
@@ -68,7 +69,7 @@ public class GrgbankingServerHandler extends ChannelInboundHandlerAdapter {
 		ctx.close();
 	}
 
-	private String praseJSON(String body) {
+	private String praseJSON(String body, String ip) {
 		String message = null;
 		JSONObject json = null;
 		try {
@@ -85,6 +86,7 @@ public class GrgbankingServerHandler extends ChannelInboundHandlerAdapter {
 				List<FtpServer> servers = ftpHandler.getServers();
 				for (FtpServer server : servers) {
 					if (opt.equals(server.getOpt())) {
+						server.setIp(ip);
 						message = server.handler(body);
 						break;
 					}

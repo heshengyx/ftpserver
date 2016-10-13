@@ -17,40 +17,43 @@ import com.grgbanking.ftpserver.enums.OptEnum;
 import com.grgbanking.ftpserver.util.FileUtil;
 
 @Service
-public class ImageHold extends FtpServer {
+public class ConfirmHold extends FtpServer {
 
 	private static final Logger LOGGER = LoggerFactory
-			.getLogger(ImageHold.class);
+			.getLogger(ConfirmHold.class);
 
 	@Value("${ftp.folder}")
 	private String folder;
 
 	@PostConstruct
 	public void init() {
-		this.opt = OptEnum.Ftping.name();
+		this.opt = OptEnum.FtpEnd.name();
 	}
 
 	@Override
 	protected String process(String json) {
 		JSONObject jsonObject = JSONObject.fromObject(json);
-		String content = jsonObject.optString("sample");
-		if (StringUtils.isBlank(content)) {
-			throw new IllegalArgumentException("图片内容不能为空");
-		}
 		String fileName = jsonObject.optString("filename");
 		if (StringUtils.isBlank(fileName)) {
 			throw new IllegalArgumentException("文件名不能为空");
 		}
+		String fileLength = jsonObject.optString("fileLength");
+		if ("0".equals(fileLength)) {
+			throw new IllegalArgumentException("文件不能为空");
+		}
 
 		//创建文件目录
 		File file = FileUtil.mkdirs(folder, ip);
-		//写入文件
-		file = FileUtil.writeFile(file.getPath() + File.separator + fileName,
-				content);
-		if (file.exists()) {
-			LOGGER.info("文件[{}]创建成功", fileName);
+		//取得文件大小
+		long lenght = FileUtil.getFileLength(file + File.separator + fileName);
+		LOGGER.info("源文件[{}]大小：{}，目标文件[{}]大小：{}", new Object[] { fileName,
+				fileLength, fileName, lenght });
+		//比较源文件和上传文件大小，如不一致则删除
+		if (fileLength.equals(String.valueOf(lenght))) {
+			LOGGER.info("文件[{}]上传成功", fileName);
 		} else {
-			LOGGER.info("文件[{}]创建失败", fileName);
+			LOGGER.info("文件[{}]上传失败，正在删除文件", fileName);
+			FileUtil.deleteFile(file + File.separator + fileName);
 		}
 		return null;
 	}

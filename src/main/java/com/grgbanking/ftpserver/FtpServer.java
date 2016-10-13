@@ -3,6 +3,11 @@ package com.grgbanking.ftpserver;
 public abstract class FtpServer {
 
 	protected String opt;
+	protected String ip;
+
+	public void setIp(String ip) {
+		this.ip = ip;
+	}
 
 	public final String getOpt() {
 		return this.opt;

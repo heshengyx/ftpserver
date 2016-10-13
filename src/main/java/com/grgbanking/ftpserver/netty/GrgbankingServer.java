@@ -1,5 +1,7 @@
 package com.grgbanking.ftpserver.netty;
 
+import com.grgbanking.ftpserver.handler.FtpHandler;
+
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -16,9 +18,11 @@ public class GrgbankingServer {
 	private EventLoopGroup workerGroup;
 	//监听端口
 	private int port;
+	private FtpHandler ftpHandler;
 
-    public GrgbankingServer(int port) {
+    public GrgbankingServer(int port, FtpHandler ftpHandler) {
         this.port = port;
+        this.ftpHandler = ftpHandler;
     }
   
 
@@ -39,7 +43,7 @@ public class GrgbankingServer {
                 	 //ch.pipeline().addLast(new DelimiterBasedFrameDecoder(Integer.MAX_VALUE, Delimiters.lineDelimiter()));
                 	 ch.pipeline().addLast(new LineBasedFrameDecoder(Integer.MAX_VALUE));
                 	 //ch.pipeline().addLast(new StringDecoder());
-                     ch.pipeline().addLast(new GrgbankingServerHandler());
+                     ch.pipeline().addLast(new GrgbankingServerHandler(ftpHandler));
                  }
              })
              .option(ChannelOption.SO_BACKLOG, 128)          // (5)
