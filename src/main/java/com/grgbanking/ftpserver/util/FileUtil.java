@@ -130,7 +130,8 @@ public class FileUtil {
 	 * 删除文件
 	 * @param fileName
 	 */
-	public static void deleteFile(String fileName) {
+	public static boolean deleteFile(String fileName) {
+		boolean flag = false;
 		if (StringUtils.isBlank(fileName)) {
 			throw new IllegalArgumentException("文件名不能为空");
 		}
@@ -138,9 +139,11 @@ public class FileUtil {
 		if (file.exists()) {
 			if (file.delete()) {
 				LOGGER.info("文件[{}]删除成功", fileName);
+				flag = true;
 			} else {
 				LOGGER.info("文件[{}]删除失败", fileName);
 			}
 		}
+		return flag;
 	}
 }

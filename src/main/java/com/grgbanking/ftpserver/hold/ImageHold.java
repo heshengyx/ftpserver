@@ -14,8 +14,15 @@ import org.springframework.stereotype.Service;
 
 import com.grgbanking.ftpserver.FtpServer;
 import com.grgbanking.ftpserver.enums.OptEnum;
+import com.grgbanking.ftpserver.enums.StatusEnum;
+import com.grgbanking.ftpserver.json.Result;
 import com.grgbanking.ftpserver.util.FileUtil;
 
+/**
+ * 图片上传
+ * @author
+ *
+ */
 @Service
 public class ImageHold extends FtpServer {
 
@@ -31,7 +38,7 @@ public class ImageHold extends FtpServer {
 	}
 
 	@Override
-	protected String process(String json) {
+	protected Result process(String json) {
 		JSONObject jsonObject = JSONObject.fromObject(json);
 		String content = jsonObject.optString("sample");
 		if (StringUtils.isBlank(content)) {
@@ -47,12 +54,18 @@ public class ImageHold extends FtpServer {
 		//写入文件
 		file = FileUtil.writeFile(file.getPath() + File.separator + fileName,
 				content);
+		
+		Result result = null;
 		if (file.exists()) {
 			LOGGER.info("文件[{}]创建成功", fileName);
+			result = new Result(String.valueOf(StatusEnum.SUCCESS.getValue()),
+					fileName);
 		} else {
 			LOGGER.info("文件[{}]创建失败", fileName);
+			result = new Result(String.valueOf(StatusEnum.FAIL.getValue()),
+					fileName);
 		}
-		return null;
+		return result;
 	}
 
 }

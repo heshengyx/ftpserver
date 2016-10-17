@@ -14,8 +14,15 @@ import org.springframework.stereotype.Service;
 
 import com.grgbanking.ftpserver.FtpServer;
 import com.grgbanking.ftpserver.enums.OptEnum;
+import com.grgbanking.ftpserver.enums.StatusEnum;
+import com.grgbanking.ftpserver.json.Result;
 import com.grgbanking.ftpserver.util.FileUtil;
 
+/**
+ * 确认业务
+ * @author
+ *
+ */
 @Service
 public class ConfirmHold extends FtpServer {
 
@@ -31,7 +38,7 @@ public class ConfirmHold extends FtpServer {
 	}
 
 	@Override
-	protected String process(String json) {
+	protected Result process(String json) {
 		JSONObject jsonObject = JSONObject.fromObject(json);
 		String fileName = jsonObject.optString("filename");
 		if (StringUtils.isBlank(fileName)) {
@@ -42,20 +49,26 @@ public class ConfirmHold extends FtpServer {
 			throw new IllegalArgumentException("文件不能为空");
 		}
 
-		//创建文件目录
+		// 创建文件目录
 		File file = FileUtil.mkdirs(folder, ip);
-		//取得文件大小
+		// 取得文件大小
 		long lenght = FileUtil.getFileLength(file + File.separator + fileName);
 		LOGGER.info("源文件[{}]大小：{}，目标文件[{}]大小：{}", new Object[] { fileName,
 				fileLength, fileName, lenght });
-		//比较源文件和上传文件大小，如不一致则删除
+
+		Result result = null;
+		// 比较源文件和上传文件大小，如不一致则删除
 		if (fileLength.equals(String.valueOf(lenght))) {
 			LOGGER.info("文件[{}]上传成功", fileName);
+			result = new Result(String.valueOf(StatusEnum.SUCCESS.getValue()),
+					fileName);
 		} else {
 			LOGGER.info("文件[{}]上传失败，正在删除文件", fileName);
 			FileUtil.deleteFile(file + File.separator + fileName);
+			result = new Result(String.valueOf(StatusEnum.FAIL.getValue()),
+					fileName);
 		}
-		return null;
+		return result;
 	}
 
 }
