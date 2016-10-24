@@ -54,4 +54,24 @@ public class BASE64Util {
 		BASE64Encoder encoder = new BASE64Encoder();
 		return encoder.encode(data);// 返回Base64编码过的字节数组字符串
 	}
+	
+	/**
+	 * 编码
+	 * @param data
+	 * @return
+	 */
+	public static String encode(byte[] data) {
+		// 对字节数组Base64编码
+		BASE64Encoder encoder = new BASE64Encoder();
+		return encoder.encode(data);// 返回Base64编码过的字节数组字符串
+	}
+	
+	public static void main(String[] args) {
+		try {
+			System.out.println(encode("f:/1.jpg").replaceAll("\\s", ""));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 }

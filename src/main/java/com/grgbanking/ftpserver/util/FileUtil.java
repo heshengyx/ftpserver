@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -53,24 +55,8 @@ public class FileUtil {
 			throw new IllegalArgumentException("文件名不能为空");
 		}
 		File file = new File(fileName);
-		RandomAccessFile randomFile = null;
-		try {
-			randomFile = new RandomAccessFile(file, "r");
-			length = randomFile.length();
-		} catch (FileNotFoundException e) {
-			LOGGER.error("文件不存在", e);
-			throw new IllegalArgumentException("文件不存在");
-		} catch (IOException e) {
-			LOGGER.error("文件读取失败", e);
-			throw new IllegalArgumentException("文件读取失败");
-		} finally {
-			if (randomFile != null) {
-				try {
-					randomFile.close();
-				} catch (IOException e) {
-					LOGGER.error("关闭文件失败", e);
-				}
-			}
+		if (file.exists()) {
+			length = file.length();
 		}
 		return length;
 	}
@@ -126,24 +112,96 @@ public class FileUtil {
 		return file;
 	}
 	
-	public static String[] readFile(String fileName, long limit) {
+	public static Map<String, String> readFile(String fileName, int limit) {
+		Map<String, String> results = new LinkedHashMap<String, String>();
 		if (StringUtils.isBlank(fileName)) {
 			throw new IllegalArgumentException("文件名不能为空");
 		}
 		File file = new File(fileName);
 		long length = file.length();
-		System.out.println(getFileLength(fileName) + "=" + length);
+		System.out.println("file length=" + length);
 		int size = (int) (length / limit);
+		System.out.println("file size=" + size);
 		int remainder = (int) (length % limit);
+		System.out.println("file remainder=" + remainder);
 		
+		//缓冲区
+        byte[] flush = new byte[limit];
+		RandomAccessFile randomFile = null;
 		for (int i = 0; i < size; i++) {
-			
+			try {
+				randomFile = new RandomAccessFile(file, "r");
+				// 将写文件指针移到文件尾
+				System.out.println(limit + " * " + i + "=" + (limit * i));
+				randomFile.seek(limit * i);
+				randomFile.read(flush);
+				
+				//if (i == 0)
+					//System.out.println(BASE64Util.encode(flush).replaceAll("\\s", ""));
+				results.put(fileName + "_" + i, BASE64Util.encode(flush).replaceAll("\\s", ""));
+			} catch (FileNotFoundException e) {
+				LOGGER.error("文件不存在", e);
+				throw new IllegalArgumentException("文件不存在");
+			} catch (IOException e) {
+				LOGGER.error("写人文件失败", e);
+				throw new IllegalArgumentException("写人文件失败");
+			} finally {
+				if (randomFile != null) {
+					try {
+						randomFile.close();
+					} catch (IOException e) {
+						LOGGER.error("关闭文件失败", e);
+					}
+				}
+			}
+		}
+		if (remainder != 0) {
+			System.out.println("=======================");
+			flush = new byte[remainder];
+			try {
+				randomFile = new RandomAccessFile(file, "r");
+				// 将写文件指针移到文件尾
+				System.out.println(limit + " * " + size + "=" + (limit * size));
+				randomFile.seek(limit * size);
+				randomFile.read(flush);
+				
+				//System.out.println(BASE64Util.encode(flush).replaceAll("\\s", ""));
+				results.put(fileName + "_" + size, BASE64Util.encode(flush).replaceAll("\\s", ""));
+			} catch (FileNotFoundException e) {
+				LOGGER.error("文件不存在", e);
+				throw new IllegalArgumentException("文件不存在");
+			} catch (IOException e) {
+				LOGGER.error("写人文件失败", e);
+				throw new IllegalArgumentException("写人文件失败");
+			} finally {
+				if (randomFile != null) {
+					try {
+						randomFile.close();
+					} catch (IOException e) {
+						LOGGER.error("关闭文件失败", e);
+					}
+				}
+			}
+		}
+		int i = 0;
+		for (Map.Entry<String, String> entry : results.entrySet()) {
+			//System.out.println(entry.getKey());
+			/*
+			if (results.size() - 1 == i) {
+				System.out.println(entry.getValue());
+			}
+			if (results.size() - 2 == i) {
+				System.out.println(entry.getValue());
+			}*/
+			//if (i == 1) 
+			System.out.print(entry.getValue());
+			i++;
 		}
 		return null;
 	}
 	
 	public static void main(String[] args) {
-		readFile("e:/datas.txt", 100);
+		readFile("f:/1.jpg", 1024 * 80);
 	}
 	
 	/**
