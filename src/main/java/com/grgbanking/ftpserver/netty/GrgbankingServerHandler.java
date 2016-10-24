@@ -34,15 +34,21 @@ public class GrgbankingServerHandler extends ChannelInboundHandlerAdapter {
 				.remoteAddress();
 		String ip = insocket.getAddress().getHostAddress();
 
-		String message = "";
+		String message = null;
 		ByteBuf buf = (ByteBuf) msg;
 		byte[] req = new byte[buf.readableBytes()];// 获得缓冲区可读的字节数
 		buf.readBytes(req);
 
+		String content = null;
 		String body = new String(req, "UTF-8");
-		LOGGER.info("终端[{}]，接收消息：{}", new Object[]{ip, body});
+		boolean flag = body.contains("simple");
+		if (flag) {
+			content = body.substring(0, body.indexOf("simple")) + body.substring(body.indexOf("type"));
+		} else {
+			content = body;
+		}
+		LOGGER.info("终端[{}]，接收消息：{}", new Object[]{ip, content});
 		if (StringUtils.isNotBlank(body)) {
-
 			message = praseJSON(body, ip);
 			LOGGER.info("终端[{}]，响应消息：", new Object[]{ip, message});
 		}
@@ -83,13 +89,18 @@ public class GrgbankingServerHandler extends ChannelInboundHandlerAdapter {
 			if (StringUtils.isBlank(opt)) {
 				message = "请求数据没有操作标示";
 			} else {
-				List<FtpServer> servers = ftpHandler.getServers();
+				/*List<FtpServer> servers = ftpHandler.getServers();
 				for (FtpServer server : servers) {
 					if (opt.equals(server.getOpt())) {
 						server.setIp(ip);
 						message = server.handler(body);
 						break;
 					}
+				}*/
+				FtpServer server = ftpHandler.getFtpServer(opt);
+				if (server != null) {
+					server.setIp(ip);
+					message = server.handler(body);
 				}
 			}
 		}

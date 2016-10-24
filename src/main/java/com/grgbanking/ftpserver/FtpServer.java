@@ -1,7 +1,5 @@
 package com.grgbanking.ftpserver;
 
-import java.util.Map;
-
 import org.apache.log4j.Logger;
 
 import com.grgbanking.ftpserver.enums.StatusEnum;

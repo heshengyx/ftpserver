@@ -126,6 +126,26 @@ public class FileUtil {
 		return file;
 	}
 	
+	public static String[] readFile(String fileName, long limit) {
+		if (StringUtils.isBlank(fileName)) {
+			throw new IllegalArgumentException("文件名不能为空");
+		}
+		File file = new File(fileName);
+		long length = file.length();
+		System.out.println(getFileLength(fileName) + "=" + length);
+		int size = (int) (length / limit);
+		int remainder = (int) (length % limit);
+		
+		for (int i = 0; i < size; i++) {
+			
+		}
+		return null;
+	}
+	
+	public static void main(String[] args) {
+		readFile("e:/datas.txt", 100);
+	}
+	
 	/**
 	 * 删除文件
 	 * @param fileName
