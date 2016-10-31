@@ -2,10 +2,14 @@ package com.grgbanking.ftpserver.test;
 
 import java.io.IOException;
 
-import com.grgbanking.ftpserver.util.BASE64Util;
-import com.grgbanking.ftpserver.util.FileUtil;
+import org.junit.Test;
 
-public class FileTest {
+public class FileTest extends BaseJunitTest {
+	
+	@Test
+	public void testEhcache() {
+		
+	}
 
 	public static void main(String[] args) throws IOException {
 		//String content = BASE64Util.encode("E:/images/2.bmp");
@@ -13,10 +17,10 @@ public class FileTest {
 		//FileUtil.writeFile("E:/images/4.jpg", content);
 		
 		String content = "";
-		String body = "{'name': '1', 'si1ple': 'dfdfd', 'type', '2'}";
+		String body = "{'name': '1', 'simple': 'dfdfd', 'type', '2'}";
 		boolean flag = body.contains("simple");
 		if (flag) {
-			content = body.substring(0, body.indexOf("simple")) + "simple': '','" + body.substring(body.indexOf("type"));
+			content = body.substring(0, body.indexOf("simple")) + body.substring(body.indexOf("type"));
 		}
 		System.out.println(content);
 	}

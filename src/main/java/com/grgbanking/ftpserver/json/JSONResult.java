@@ -2,6 +2,8 @@ package com.grgbanking.ftpserver.json;
 
 import java.io.Serializable;
 
+import org.apache.commons.lang.StringUtils;
+
 public class JSONResult implements Serializable {
 
 	/**
@@ -12,6 +14,10 @@ public class JSONResult implements Serializable {
 	private String retcode;
 	private String message;
 	
+	private String filename;
+	private String fileLength;
+	private String sample;
+	
 	public JSONResult() {}
 	
 	public JSONResult(String retcode, String message) {
@@ -19,6 +25,30 @@ public class JSONResult implements Serializable {
 		this.message = message;
 	}
 	
+	public String getFilename() {
+		return filename;
+	}
+
+	public void setFilename(String filename) {
+		this.filename = filename;
+	}
+
+	public String getFileLength() {
+		return fileLength;
+	}
+
+	public void setFileLength(String fileLength) {
+		this.fileLength = fileLength;
+	}
+
+	public String getSample() {
+		return sample;
+	}
+
+	public void setSample(String sample) {
+		this.sample = sample;
+	}
+
 	public String getType() {
 		return type;
 	}
@@ -43,6 +73,19 @@ public class JSONResult implements Serializable {
 		sb.append("{'type':'").append(type);
 		sb.append("','retcode':'").append(retcode);
 		sb.append("','name':'").append(message);
+		sb.append("'}");
+		return sb.toString();
+	}
+	
+	public String toCacheJson() {
+		StringBuilder sb = new StringBuilder("");
+		sb.append("{'type':'").append(type);
+		sb.append("','filename':'").append(filename);
+		if (StringUtils.isNotBlank(sample)) {
+			sb.append("','sample':'").append(sample);
+		} else if (StringUtils.isNotBlank(fileLength)) {
+			sb.append("','fileLength':'").append(fileLength);
+		}
 		sb.append("'}");
 		return sb.toString();
 	}

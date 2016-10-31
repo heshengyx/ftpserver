@@ -6,5 +6,11 @@ public enum OptEnum {
 	Ftping,
 	
 	//确认消息
-	FtpEnd;
+	FtpEnd, 
+	
+	//升级消息
+	UpgradeFile,
+	
+	//升级开始
+	UpgradeStart;
 }

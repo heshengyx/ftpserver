@@ -16,5 +16,5 @@
         overflowToDisk="true"
         timeToIdleSeconds="1800"
         timeToLiveSeconds="3600"
-        memoryStoreEvictionPolicy="LFU" />
+        memoryStoreEvictionPolicy="FIFO" />
 </ehcache>
