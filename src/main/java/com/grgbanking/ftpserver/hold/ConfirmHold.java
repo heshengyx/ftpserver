@@ -38,7 +38,7 @@ public class ConfirmHold extends FtpServer {
 	}
 
 	@Override
-	protected Result process(String json) {
+	protected Result process(String json, String ip) {
 		JSONObject jsonObject = JSONObject.fromObject(json);
 		String fileName = jsonObject.optString("filename");
 		if (StringUtils.isBlank(fileName)) {

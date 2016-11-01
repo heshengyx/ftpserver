@@ -14,9 +14,12 @@ import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.CollectionUtils;
 
 import com.grgbanking.ftpserver.FtpServer;
+import com.grgbanking.ftpserver.common.Symbol;
 import com.grgbanking.ftpserver.enums.OptEnum;
+import com.grgbanking.ftpserver.enums.StatusEnum;
 import com.grgbanking.ftpserver.handler.ApplicationContextHandler;
 import com.grgbanking.ftpserver.handler.FtpHandler;
 import com.grgbanking.ftpserver.hold.CacheHold;
@@ -42,56 +45,113 @@ public class GrgbankingServerHandler extends ChannelInboundHandlerAdapter {
 				.remoteAddress();
 		String ip = insocket.getAddress().getHostAddress();
 
-		String message = null;
 		ByteBuf buf = (ByteBuf) msg;
-		byte[] req = new byte[buf.readableBytes()];// 获得缓冲区可读的字节数
-		buf.readBytes(req);
+		int length = buf.readableBytes();
+		if (length > 0) {
+			byte[] req = new byte[buf.readableBytes()];// 获得缓冲区可读的字节数
+			buf.readBytes(req);
 
-		String content = null;
-		String body = new String(req, "UTF-8");
-		// 清空变量，释放内存
-		buf = null;
-		req = null;
+			String content = null;
+			String body = new String(req, "UTF-8");
 
-		boolean flag = body.contains("simple");
-		if (flag) {
-			content = body.substring(0, body.indexOf("simple"))
-					+ body.substring(body.indexOf("type"));
-		} else {
-			content = body;
-		}
-		LOGGER.info("终端[{}]，接收消息：{}", new Object[] { ip, content });
-		if (StringUtils.isNotBlank(body)) {
-			message = praseJSON(body, ip);
-			LOGGER.info("终端[{}]，响应消息：{}", new Object[] { ip, message });
-		}
-		if (StringUtils.isNotBlank(message)) {
-			ByteBuf resp = Unpooled.copiedBuffer(message.getBytes("UTF-8"));
-			ctx.write(resp);// 性能考虑，仅将待发送的消息发送到缓冲数组中，再通过调用flush方法，写入channel中
-		} else if (body.contains(OptEnum.UpgradeStart.name())) {
-			//升级消息
-			downFile(ip, ctx);	
+			boolean flag = body.contains("simple");
+			if (flag) {
+				content = body.substring(0, body.indexOf("simple"))
+						+ body.substring(body.indexOf("type"));
+			} else {
+				content = body;
+			}
+			LOGGER.info("终端[{}]，接收消息：{}", new Object[] { ip, content });
+
+			praseMessage(ctx, body, ip);
 		}
 	}
 
-	private void downFile(String ip, ChannelHandlerContext ctx)
+	private void praseMessage(ChannelHandlerContext ctx, String body, String ip)
+			throws UnsupportedEncodingException {
+		String message = null;
+		JSONObject json = null;
+		try {
+			json = JSONObject.fromObject(body);
+		} catch (Exception e) {
+			LOGGER.error("请求数据不是JSON格式", e);
+			message = "请求数据不是JSON格式";
+		}
+		if (json != null) {
+			String opt = json.optString("type");
+			if (StringUtils.isBlank(opt)) {
+				message = "请求数据没有操作标示";
+			} else if (OptEnum.UpgradeStart.name().equals(opt)) {
+				// 升级消息
+				downFile(ctx, ip, json.optString("Version"));
+			} else {
+				FtpServer server = ftpHandler.getFtpServer(opt);
+				if (server != null) {
+					message = server.handler(body, ip);
+				}
+			}
+		}
+		if (StringUtils.isNotBlank(message)) {
+			LOGGER.info("终端[{}]，响应消息：{}", new Object[] { ip, message });
+			ByteBuf resp = Unpooled.copiedBuffer(message.getBytes("UTF-8"));
+			ctx.write(resp);
+		}
+	}
+
+	private void downFile(ChannelHandlerContext ctx, String ip, String version)
 			throws UnsupportedEncodingException {
 		JSONResult result = new JSONResult();
 		Map<String, String> results = cacheHold.getCache();
-		
-		for (Map.Entry<String, String> entry : results.entrySet()) {
-			result.setType(OptEnum.UpgradeFile.name());
-			result.setFilename(entry.getKey().substring(7, entry.getKey().lastIndexOf("_")));
-			result.setSample(entry.getValue());
-			
-			ByteBuf resp = Unpooled.copiedBuffer(result.toCacheJson().getBytes(
-					"UTF-8"));
-			LOGGER.info("终端[{}]，响应消息：{}", new Object[] { ip, result.toCacheJson() });
-			try {
-				Thread.sleep(100);
-			} catch (InterruptedException e) {}
-			ctx.writeAndFlush(resp);
+		if (!CollectionUtils.isEmpty(results)) {
+			// 取得版本号
+			String v = cacheHold.getVersion();
+			LOGGER.info("终端版本[{}]，服务端版本：[{}]", new Object[] { version, v });
+			if (!v.equals(version) && StringUtils.isNotBlank(version)) {
+				result.setType(OptEnum.UpgradeStart.name());
+				result.setRetcode(String.valueOf(StatusEnum.SUCCESS.getValue()));
+				ByteBuf resp = Unpooled.copiedBuffer(result.toJson().getBytes(
+						"UTF-8"));
+				LOGGER.info("终端[{}]，响应消息：{}",
+						new Object[] { ip, result.toJson() });
+				ctx.writeAndFlush(resp);
+				
+				String[] keys = null;
+				for (Map.Entry<String, String> entry : results.entrySet()) {
+					keys = StringUtils.split(entry.getKey(), Symbol.COLONS);
+					result.setType(OptEnum.UpgradeFile.name());
+					result.setFilename(keys[0].substring(
+							cacheHold.getFolder().length() + 1).replaceAll("\\\\", "/"));
+					result.setFrameLength(keys[2]);
+					result.setSample(entry.getValue());
+
+					resp = Unpooled.copiedBuffer(result.toCacheJson().getBytes(
+							"UTF-8"));
+					LOGGER.info("终端[{}]，响应消息：{}",
+							new Object[] { ip, result.toCacheJson() });
+					try {
+						Thread.sleep(100);
+					} catch (InterruptedException e) {
+					}
+					ctx.writeAndFlush(resp);
+				}
+				result.setType(OptEnum.UpgradeOver.name());
+				result.setRetcode(String.valueOf(StatusEnum.SUCCESS.getValue()));
+				resp = Unpooled.copiedBuffer(result.toJson().getBytes(
+						"UTF-8"));
+				LOGGER.info("终端[{}]，响应消息：{}",
+						new Object[] { ip, result.toJson() });
+				ctx.writeAndFlush(resp);
+			} else {
+				result.setType(OptEnum.UpgradeStart.name());
+				result.setRetcode(String.valueOf(StatusEnum.FAIL.getValue()));
+				ByteBuf resp = Unpooled.copiedBuffer(result.toJson().getBytes(
+						"UTF-8"));
+				LOGGER.info("终端[{}]，响应消息：{}",
+						new Object[] { ip, result.toJson() });
+				ctx.writeAndFlush(resp);
+			}
 		}
+		
 	}
 
 	@Override
@@ -105,29 +165,5 @@ public class GrgbankingServerHandler extends ChannelInboundHandlerAdapter {
 			throws Exception {
 		LOGGER.error("异常退出", cause);
 		ctx.close();
-	}
-
-	private String praseJSON(String body, String ip) {
-		String message = null;
-		JSONObject json = null;
-		try {
-			json = JSONObject.fromObject(body);
-		} catch (Exception e) {
-			LOGGER.error("请求数据不是JSON格式", e);
-			message = "请求数据不是JSON格式";
-		}
-		if (json != null) {
-			String opt = json.optString("type");
-			if (StringUtils.isBlank(opt)) {
-				message = "请求数据没有操作标示";
-			} else {
-				FtpServer server = ftpHandler.getFtpServer(opt);
-				if (server != null) {
-					server.setIp(ip);
-					message = server.handler(body);
-				}
-			}
-		}
-		return message;
 	}
 }

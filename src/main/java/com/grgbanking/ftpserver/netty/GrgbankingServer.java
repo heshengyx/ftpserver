@@ -10,7 +10,12 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.LineBasedFrameDecoder;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class GrgbankingServer {
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(GrgbankingServer.class);
 	
 	private EventLoopGroup bossGroup;
 	private EventLoopGroup workerGroup;
@@ -47,14 +52,14 @@ public class GrgbankingServer {
             // Bind and start to accept incoming connections.
             ChannelFuture f = b.bind(port).sync(); // (7)
             System.out.println(f.channel().localAddress());
-            System.out.println("FTP服务启动成功，在端口[" + port + "]监听服务");
+            LOGGER.info("FTP服务启动成功，在端口[" + port + "]监听服务");
             // Wait until the server socket is closed.
             // In this example, this does not happen, but you can do that to gracefully
             // shut down your server.
             f.channel().closeFuture().sync();
         } finally {
         	//System.out.println("finally");
-        	System.out.println("指静脉服务正在关闭中...finally");
+        	LOGGER.info("指静脉服务正在关闭中...finally");
             workerGroup.shutdownGracefully();
             bossGroup.shutdownGracefully();
         }

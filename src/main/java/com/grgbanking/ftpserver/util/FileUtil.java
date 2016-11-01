@@ -5,7 +5,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -56,6 +58,42 @@ public class FileUtil {
 			length = file.length();
 		}
 		return length;
+	}
+	
+	/**
+	 * 读取文件内容
+	 * @param fileName
+	 * @return
+	 */
+	public static List<String> readFile(String fileName) {
+		if (StringUtils.isBlank(fileName)) {
+			throw new IllegalArgumentException("文件名不能为空");
+		}
+		List<String> contents = new ArrayList<String>();
+		File file = new File(fileName);
+		RandomAccessFile randomFile = null;
+		try {
+			randomFile = new RandomAccessFile(file, "r");
+			String content = null;
+			while((content = randomFile.readLine()) != null) {
+				contents.add(content);
+			}
+		} catch (FileNotFoundException e) {
+			LOGGER.error("文件不存在", e);
+			throw new IllegalArgumentException("文件不存在");
+		} catch (IOException e) {
+			LOGGER.error("写人文件失败", e);
+			throw new IllegalArgumentException("写人文件失败");
+		} finally {
+			if (randomFile != null) {
+				try {
+					randomFile.close();
+				} catch (IOException e) {
+					LOGGER.error("关闭文件失败", e);
+				}
+			}
+		}
+		return contents;
 	}
 
 	/**

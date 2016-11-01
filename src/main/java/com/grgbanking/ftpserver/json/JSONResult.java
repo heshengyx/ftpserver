@@ -16,6 +16,7 @@ public class JSONResult implements Serializable {
 	
 	private String filename;
 	private String fileLength;
+	private String frameLength;
 	private String sample;
 	
 	public JSONResult() {}
@@ -25,6 +26,14 @@ public class JSONResult implements Serializable {
 		this.message = message;
 	}
 	
+	public String getFrameLength() {
+		return frameLength;
+	}
+
+	public void setFrameLength(String frameLength) {
+		this.frameLength = frameLength;
+	}
+
 	public String getFilename() {
 		return filename;
 	}
@@ -83,6 +92,7 @@ public class JSONResult implements Serializable {
 		sb.append("','filename':'").append(filename);
 		if (StringUtils.isNotBlank(sample)) {
 			sb.append("','sample':'").append(sample);
+			sb.append("','frameLength':'").append(frameLength);
 		} else if (StringUtils.isNotBlank(fileLength)) {
 			sb.append("','fileLength':'").append(fileLength);
 		}

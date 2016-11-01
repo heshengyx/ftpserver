@@ -16,11 +16,6 @@ public abstract class FtpServer {
 	private static final Logger LOGGER = Logger.getLogger(FtpServer.class);
 
 	protected String opt; //业务类型
-	protected String ip;
-
-	public void setIp(String ip) {
-		this.ip = ip;
-	}
 
 	public final String getOpt() {
 		return this.opt;
@@ -31,10 +26,10 @@ public abstract class FtpServer {
 	 * @param json
 	 * @return
 	 */
-	public final String handler(String json) {
+	public final String handler(String json, String ip) {
 		JSONResult jsonResult = null;
 		try {
-			Result result = process(json);
+			Result result = process(json, ip);
 			if (result != null) {
 				jsonResult = new JSONResult(result.getCode(),
 						result.getMessage());
@@ -53,11 +48,11 @@ public abstract class FtpServer {
 		}
 		return jsonResult.toJson();
 	}
-
+	
 	/**
 	 * 业务处理
 	 * @param json
 	 * @return
 	 */
-	protected abstract Result process(String json);
+	protected abstract Result process(String json, String ip);
 }

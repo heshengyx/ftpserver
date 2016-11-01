@@ -38,7 +38,7 @@ public class ImageHold extends FtpServer {
 	}
 
 	@Override
-	protected Result process(String json) {
+	protected Result process(String json, String ip) {
 		JSONObject jsonObject = JSONObject.fromObject(json);
 		String content = jsonObject.optString("sample");
 		if (StringUtils.isBlank(content)) {

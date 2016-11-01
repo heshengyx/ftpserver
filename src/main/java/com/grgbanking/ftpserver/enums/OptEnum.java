@@ -12,5 +12,14 @@ public enum OptEnum {
 	UpgradeFile,
 	
 	//升级开始
-	UpgradeStart;
+	UpgradeStart,
+	
+	//升级结束
+	UpgradeOver,
+	
+	//文件开始
+	UpgradeFileStart,
+	
+	//文件结束
+	UpgradeFileEnd;
 }
