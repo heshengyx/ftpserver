@@ -16,7 +16,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.grgbanking.ftpserver.common.Symbol;
-import com.grgbanking.ftpserver.enums.OptEnum;
 import com.grgbanking.ftpserver.util.BASE64Util;
 import com.grgbanking.ftpserver.util.FileUtil;
 import com.grgbanking.ftpserver.util.PropertyUtil;
@@ -38,6 +37,12 @@ public class CacheHold {
 	 */
 	@Value("${down.limit}")
 	private String limit;
+	
+	/**
+	 * 时间间隔
+	 */
+	@Value("${down.time}")
+	private String time;
 	
 	/**
 	 * 目录版本
@@ -68,6 +73,14 @@ public class CacheHold {
 	
 	private Map<String, String> results = new LinkedHashMap<String, String>();
 	
+	public String getTime() {
+		return time;
+	}
+
+	public void setTime(String time) {
+		this.time = time;
+	}
+
 	public String getFolder() {
 		return this.folder;
 	}

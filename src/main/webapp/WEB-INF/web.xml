@@ -15,6 +15,11 @@
 		<param-name>contextConfigLocation</param-name>
 		<param-value>classpath*:application-web.xml</param-value>
 	</context-param>
+	<!-- 是否开启下载文件缓存 -->
+	<context-param>
+    	<param-name>isCache</param-name>
+    	<param-value>true</param-value>
+	</context-param>
 	<!-- 监听端口 -->
 	<context-param>
     	<param-name>serverPort</param-name>

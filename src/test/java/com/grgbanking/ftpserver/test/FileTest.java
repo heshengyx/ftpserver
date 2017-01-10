@@ -7,6 +7,7 @@ import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
 
 import com.grgbanking.ftpserver.common.Symbol;
+import com.grgbanking.ftpserver.util.BASE64Util;
 import com.grgbanking.ftpserver.util.FileUtil;
 import com.grgbanking.ftpserver.util.PropertyUtil;
 
@@ -30,14 +31,28 @@ public class FileTest extends BaseJunitTest {
 		}
 		System.out.println(content);*/
 
-		String[] keys = StringUtils.split("F:/down/grgfingervein2016110101/config/system.cfg#-#0#-#349", Symbol.COLONS);
+		/*String[] keys = StringUtils.split("F:/down/grgfingervein2016110101/config/system.cfg#-#0#-#349", Symbol.COLONS);
 		for (String key : keys) {
 			System.out.println(key);
-		}
+		}*/
 		
 		//List<String> content = FileUtil.readFile("F:/home/version.txt");
 		//System.out.println(content);
 		//String content = PropertyUtil.readByKey("F:/home/grgfingervein-2016110101/config/system.cfg", "version");
 		//System.out.println(content);
+		
+		/*String content = BASE64Util.encode("E:/testData/G0107813_null_路超_安全产品部_96_2016-10-26_16-54-36.bin");
+		System.out.println(content.replaceAll("\\s", ""));
+		byte[] b = BASE64Util.decoder(content);
+		System.out.println(b.length);*/
+		
+		checkMaster(true);
+	}
+
+	private static boolean checkMaster(boolean flag) {
+		while(true) {
+			System.out.println(flag);
+			return flag;
+		}
 	}
 }

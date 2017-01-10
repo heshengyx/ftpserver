@@ -25,8 +25,14 @@ public class GrgbankingListener implements ServletContextListener {
  
 	@Override
 	public void contextInitialized(ServletContextEvent sce) {
-		CacheHold cacheHold = ApplicationContextHandler.getBean("cacheHold");
-		cacheHold.readFile();
+		String isCache = sce.getServletContext().getInitParameter("isCache");
+		if (Boolean.parseBoolean(isCache)) {
+			CacheHold cacheHold = ApplicationContextHandler.getBean("cacheHold");
+			LOGGER.info("文件升级服务正在启动中...");
+			cacheHold.readFile();
+			LOGGER.info("文件升级服务启动完成");
+		}
+		
 		//读取配置信息
 		String serverPort = sce.getServletContext().getInitParameter("serverPort");
 		server = new GrgbankingServer(Integer.parseInt(serverPort));

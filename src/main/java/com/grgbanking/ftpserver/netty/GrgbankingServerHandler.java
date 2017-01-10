@@ -2,6 +2,8 @@ package com.grgbanking.ftpserver.netty;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 
@@ -67,7 +69,7 @@ public class GrgbankingServerHandler extends ChannelInboundHandlerAdapter {
 		}
 	}
 
-	private void praseMessage(ChannelHandlerContext ctx, String body, String ip)
+	private void praseMessage(ChannelHandlerContext ctx, String body, final String ip)
 			throws UnsupportedEncodingException {
 		String message = null;
 		JSONObject json = null;
@@ -92,9 +94,14 @@ public class GrgbankingServerHandler extends ChannelInboundHandlerAdapter {
 			}
 		}
 		if (StringUtils.isNotBlank(message)) {
-			LOGGER.info("终端[{}]，响应消息：{}", new Object[] { ip, message });
+			final String msg = message;
 			ByteBuf resp = Unpooled.copiedBuffer(message.getBytes("UTF-8"));
-			ctx.write(resp);
+			ChannelFuture future = ctx.write(resp);
+			future.addListener(new ChannelFutureListener() {
+				public void operationComplete(ChannelFuture future) {
+					LOGGER.info("终端[{}]，响应消息：{}", new Object[] { ip, msg });
+				}
+			});
 		}
 	}
 
@@ -129,10 +136,14 @@ public class GrgbankingServerHandler extends ChannelInboundHandlerAdapter {
 					LOGGER.info("终端[{}]，响应消息：{}",
 							new Object[] { ip, result.toCacheJson() });
 					try {
-						Thread.sleep(100);
+						Thread.sleep(Long.parseLong(cacheHold.getTime()));
 					} catch (InterruptedException e) {
 					}
 					ctx.writeAndFlush(resp);
+				}
+				try {
+					Thread.sleep(Long.parseLong(cacheHold.getTime()));
+				} catch (InterruptedException e) {
 				}
 				result.setType(OptEnum.UpgradeOver.name());
 				result.setRetcode(String.valueOf(StatusEnum.SUCCESS.getValue()));
